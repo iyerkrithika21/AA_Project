@@ -29,8 +29,8 @@ def cost(dataset,C,Z):
     return cost_KM(C,U_minus_Z)
     
 def local_search_outliers(dataset,k,z,centers_1):
-    alpha = 1000000000000
-    e = 0.0001
+    alpha = 10000000000000000
+    e = 0.00001
     #finding Z=outliers(C)
     clusters = calc_distances(dataset,centers_1,z)
     clusters = clusters.reshape((len(clusters),1))
@@ -142,6 +142,18 @@ def generate_gaussian_data(k,ns,dim):
             data = np.vstack((data,a))
     return([data,b])
 
+
+def plot_knn(a,b,c):
+    plt.figure(figsize=(10,10))
+    plt.plot(a[0:100,0],a[0:100,1],'.') 
+    plt.plot(a[100:200,0],a[100:200,1],'g.')
+    plt.plot(a[200:300,0],a[200:300,1],'r.') 
+    plt.plot(d[:,0],d[:,1],'yd', markersize=8)
+    
+    plt.plot(c[:,0],c[:,1],'s', markersize=8)
+    plt.legend()
+    plt.show()
+
 k=3
 z = 10
 [a,b] = generate_gaussian_data(k,100,3)
@@ -163,3 +175,4 @@ plt.figure(figsize=(10,10))
 plt.plot(a[:,0],a[:,1],'o')
 plt.plot(Z[:,0],Z[:,1],'r*')
 plt.plot(c[:,0],c[:,1],'p')
+plot_knn(a,b,c)
