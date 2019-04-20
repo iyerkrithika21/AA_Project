@@ -29,31 +29,53 @@ def cost(dataset,C,Z):
     return cost_KM(C,U_minus_Z)
     
 def local_search_outliers(dataset,k,z,centers_1):
-    alpha = 10000000000000000
-    e = 0.00001
+    alpha = 10000000000000000000
+    e = 0.001
+    print(k)
     #finding Z=outliers(C)
     clusters = calc_distances(dataset,centers_1,z)
     clusters = clusters.reshape((len(clusters),1))
     Z = find_outliers(dataset,centers_1,clusters,z)
     C = deepcopy(centers_1)
+    
+
+    
     #While the solution improves by performing swaps
     while(alpha*(1-e/k)>cost(dataset,C,Z)):
+    
+    #--------------------------------------------------------------------------
+        print("Alpha e by k is " + str(alpha*(1-e/k)))
+        print("Cost is " + str(cost(dataset,C,Z)))
+    #--------------------------------------------------------------------------
+        #print("I am in while loop")
+        #calculate prec recall and draw the graph
         alpha = cost(dataset,C,Z)
+        
         #local search with no outliers
         U_minus_Z = array_set_diff(dataset,Z)
+        print("Calling LS ")
         C = local_search(U_minus_Z,C,k)
         Cbar = deepcopy(C)
         Zbar = deepcopy(Z)
+        
+        
         #find z additional outliers
         clusters = calc_distances(U_minus_Z,C,z)
         clusters = clusters.reshape((len(clusters),1))
         outlier = find_outliers(U_minus_Z,C,clusters,z)
         Znew = array_union(Z,outlier)  
+        
+        print("2nd")
+        print("Alpha e by k is " + str(alpha*(1-e/k)))
+        print("Cost is " + str(cost(dataset,C,Z)))
         if cost(dataset,C,Z)*(1-e/k) > cost(dataset,C,Znew):
             Zbar = deepcopy(Znew)
+            
+        #print("Entering for loop")   
         #for each center try swapping with each point from the dataset
         for i in range(len(C)):
             for j in range(len(dataset)):
+                #print("lso for")
                 u = dataset[j,:]
                 new_centers = deepcopy(Cbar)
                 new_centers[i,:] = u         
@@ -62,31 +84,39 @@ def local_search_outliers(dataset,k,z,centers_1):
                 clusters = clusters.reshape((len(clusters),1))
                 outliers1 = find_outliers(U_minus_Z,new_centers,clusters,z)
                 new_outlier = array_union(Z,outliers1)
+                
+                
                 #if this is the most improved center found so far
                 if(cost(dataset,new_centers,new_outlier)<cost(dataset,Cbar,Zbar)):
                     #Update the temp solution
                     Cbar = deepcopy(new_centers)
                     Zbar = deepcopy(new_outlier)
+        print("For loop done")          
+                    
         if cost(dataset,C,Z)*(1-e/k)>cost(dataset,Cbar,Zbar):
             C = deepcopy(Cbar)
             Z = deepcopy(Zbar) 
+            
+            
     return [C,Z]
 
 
 def local_search(dataset,centers_1,k):
-    alpha = 1000000000000
-    e = 0.0001
+    print("LS executing")
+    alpha = 10000000000000000
+    e = 0.01
     centers = deepcopy(centers_1)
     #While the solution improves by performing swaps
     while(alpha*(1-e/k)>cost_KM(centers,dataset)):
         alpha = cost_KM(centers,dataset)
         #temporary improved set of centers
         Cbar=centers
+        #print("Inside LS while loop")
         #for each center try swapping with each point from the dataset
         for i in range(len(centers)):
 
             for j in range(len(dataset)):
-                #print("Centers")
+                #print("ls for")
                 u = dataset[j,:]
                 #print(centers)
                 new_centers = deepcopy(Cbar)
@@ -98,6 +128,7 @@ def local_search(dataset,centers_1,k):
                     Cbar = deepcopy(new_centers)
                     #break
             #break  
+        #print("ls for done")
         #Update the solution to the best swap found
         centers = deepcopy(Cbar)
     return centers

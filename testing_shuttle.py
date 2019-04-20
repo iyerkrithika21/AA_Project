@@ -23,9 +23,11 @@ Data_dir = "\\datasets\\shuttle\\"
 filename = "shuttle.trn"
 file = open(path+Data_dir+"shuttle_training_data.pkl",'rb')
 [training_data,training_label] = pickle.load(file)
-
-n = np.random.randint(1,len(training_data),size=3)
-initial_centers = training_data[n,:]
+z = 20
+k = 3
+n = np.random.randint(1,len(training_data),size=k)
+initial_centers = training_data[n,0:1]
 
 X_new = array_set_diff(training_data,initial_centers)
-[centers,outliers] = local_search_outliers(X_new,3,192,initial_centers)
+[centers,outliers] = local_search_outliers(X_new[:,0:1],k,z,initial_centers)
+
