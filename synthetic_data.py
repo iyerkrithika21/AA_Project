@@ -15,7 +15,7 @@ def generate_synthetic_data(k,z,dim,num_samples):
     centers = np.random.uniform(0,100,(k,dim))
     for i in range(len(centers)):
         mu = centers[i,:]
-        data = np.random.normal(mu,1,(num_samples,dim))
+        data = np.random.normal(mu,5,(num_samples,dim))
         plt.plot(mu[0],mu[1],'bo')
         plt.plot(data[:,0],data[:,1],'r*')
         dataset = np.vstack([dataset,data])    

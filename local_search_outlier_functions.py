@@ -29,8 +29,8 @@ def cost(dataset,C,Z):
     return cost_KM(C,U_minus_Z)
     
 def local_search_outliers(dataset,k,z,centers_1):
-    alpha = 10000000000000000000
-    e = 0.001
+    alpha = 100000000
+    e = 0.00001
     print(k)
     #finding Z=outliers(C)
     clusters = calc_distances(dataset,centers_1,z)
@@ -103,8 +103,8 @@ def local_search_outliers(dataset,k,z,centers_1):
 
 def local_search(dataset,centers_1,k):
     print("LS executing")
-    alpha = 10000000000000000
-    e = 0.01
+    alpha = 90000000000000000
+    e = 0.0001
     centers = deepcopy(centers_1)
     #While the solution improves by performing swaps
     while(alpha*(1-e/k)>cost_KM(centers,dataset)):
