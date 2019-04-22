@@ -17,20 +17,31 @@ def cost_KM(centers,dataset):
     cost = sum(distances.min(axis=0))
     return cost
 
-def array_union(A,B):
-    C=A
-    for item in B:
-        if item not in C:
-            np.append(C,item)
-    return C
-
+def array_union(arr1,arr2):
+    arr1_view = arr1.view([('',arr1.dtype)]*arr1.shape[1])
+    arr2_view = arr2.view([('',arr2.dtype)]*arr2.shape[1])
+    u = np.union1d(arr1_view, arr2_view)
+    return u.view(arr1.dtype).reshape(-1, arr1.shape[1])
+    
 def cost(dataset,C,Z):
     U_minus_Z=array_set_diff(dataset,Z)
     return cost_KM(C,U_minus_Z)
+
+def find_kfarthest(dataset,centers,z):
+    clusters = calc_distances(dataset,centers,z)
+    clusters = clusters.reshape((len(clusters),1))
+    distances = np.zeros(len(dataset))
+    for i in range(len(dataset)):
+        distances[i] = sum((dataset[i] - centers[clusters[i][0]])**2)
+    distances = np.sqrt(distances)
+    sorted_distances = np.argsort(distances)
+    sorted_distances = sorted_distances[::-1]
+
+    return(dataset[sorted_distances[:z]])
     
 def local_search_outliers(dataset,k,z,centers_1):
-    alpha = 100000000
-    e = 0.00001
+    alpha = 100000000000
+    e = 0.001
     print(k)
     #finding Z=outliers(C)
     clusters = calc_distances(dataset,centers_1,z)
@@ -42,7 +53,7 @@ def local_search_outliers(dataset,k,z,centers_1):
     
     #While the solution improves by performing swaps
     while(alpha*(1-e/k)>cost(dataset,C,Z)):
-    
+
     #--------------------------------------------------------------------------
         print("Alpha e by k is " + str(alpha*(1-e/k)))
         print("Cost is " + str(cost(dataset,C,Z)))
@@ -63,11 +74,13 @@ def local_search_outliers(dataset,k,z,centers_1):
         clusters = calc_distances(U_minus_Z,C,z)
         clusters = clusters.reshape((len(clusters),1))
         outlier = find_outliers(U_minus_Z,C,clusters,z)
-        Znew = array_union(Z,outlier)  
+        Znew_temp = array_union(Z,outlier)
+        Znew = find_kfarthest(Znew_temp,C,z)
+        
         
         print("2nd")
-        print("Alpha e by k is " + str(alpha*(1-e/k)))
-        print("Cost is " + str(cost(dataset,C,Z)))
+        print("Cost 2 is" + str(cost(dataset,C,Z)*(1-e/k)))
+        print("Cost is " + str(cost(dataset,C,Znew)))
         if cost(dataset,C,Z)*(1-e/k) > cost(dataset,C,Znew):
             Zbar = deepcopy(Znew)
             
@@ -83,19 +96,27 @@ def local_search_outliers(dataset,k,z,centers_1):
                 clusters = calc_distances(U_minus_Z,new_centers,z)
                 clusters = clusters.reshape((len(clusters),1))
                 outliers1 = find_outliers(U_minus_Z,new_centers,clusters,z)
-                new_outlier = array_union(Z,outliers1)
-                
+                new_outlier_temp = array_union(Z,outliers1)
+                new_outlier = find_kfarthest(new_outlier_temp,new_centers,z)
+        
                 
                 #if this is the most improved center found so far
                 if(cost(dataset,new_centers,new_outlier)<cost(dataset,Cbar,Zbar)):
                     #Update the temp solution
                     Cbar = deepcopy(new_centers)
                     Zbar = deepcopy(new_outlier)
-        print("For loop done")          
-                    
-        if cost(dataset,C,Z)*(1-e/k)>cost(dataset,Cbar,Zbar):
+        print("For loop done")     
+        a=cost(dataset,C,Z)*(1-e/k)
+        b=cost(dataset,Cbar,Zbar)
+        print(a)
+        print(b)
+        if a>b:
             C = deepcopy(Cbar)
             Z = deepcopy(Zbar) 
+            print("If succeded")
+        print("Outliers size:"+str(len(Z)))
+
+        
             
             
     return [C,Z]
@@ -157,6 +178,9 @@ def find_outliers(dataset,centers,clusters,z):
 
 
 def array_set_diff(dataset,outliers):
+    if len(outliers) ==0:
+        a1_rows = dataset.view([('', dataset.dtype)] * dataset.shape[1])
+        return (a1_rows.view(dataset.dtype).reshape(-1, dataset.shape[1]))
     a1_rows = dataset.view([('', dataset.dtype)] * dataset.shape[1])
     a2_rows = outliers.view([('', outliers.dtype)] * outliers.shape[1])
     return(np.setdiff1d(a1_rows, a2_rows).view(dataset.dtype).reshape(-1, dataset.shape[1]))
