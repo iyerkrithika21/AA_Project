@@ -1,0 +1,26 @@
+15
+Alpha e by k is 99993333333333.33
+Cost is 36873.174541363456
+Calling LS 
+LS executing
+2nd
+Cost 2 is18064.798731848354
+Cost is 16303.492533016191
+For loop done
+18064.798731848354
+16303.492533016191
+If succeded
+Outliers size:100
+Alpha e by k is 36870.716329727366
+Cost is 16303.492533016191
+Calling LS 
+LS executing
+2nd
+Cost 2 is16100.719339488647
+Cost is 16086.254269056351
+For loop done
+16100.719339488647
+16086.254269056351
+If succeded
+Outliers size:100
+Precision is   1.0   Recall is   1.0

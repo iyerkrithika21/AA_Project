@@ -22,6 +22,11 @@ def array_union(arr1,arr2):
     arr2_view = arr2.view([('',arr2.dtype)]*arr2.shape[1])
     u = np.union1d(arr1_view, arr2_view)
     return u.view(arr1.dtype).reshape(-1, arr1.shape[1])
+
+def array_row_intersection(a,b):
+   tmp=np.prod(np.swapaxes(a[:,:,None],1,2)==b,axis=2)
+   index= np.sum(np.cumsum(tmp,axis=0)*tmp==1,axis=1).astype(bool)
+   return a[index==False]
     
 def cost(dataset,C,Z):
     U_minus_Z=array_set_diff(dataset,Z)
@@ -40,8 +45,9 @@ def find_kfarthest(dataset,centers,z):
     return(dataset[sorted_distances[:z]])
     
 def local_search_outliers(dataset,k,z,centers_1):
-    alpha = 100000000000
-    e = 0.001
+    alpha = 100000000000000
+    e = 0.0001
+    lm = 0.85
     print(k)
     #finding Z=outliers(C)
     clusters = calc_distances(dataset,centers_1,z)
@@ -52,7 +58,7 @@ def local_search_outliers(dataset,k,z,centers_1):
 
     
     #While the solution improves by performing swaps
-    while(alpha*(1-e/k)>cost(dataset,C,Z)):
+    while(alpha*(1-e/k)*lm>cost(dataset,C,Z)):
 
     #--------------------------------------------------------------------------
         print("Alpha e by k is " + str(alpha*(1-e/k)))
@@ -64,6 +70,7 @@ def local_search_outliers(dataset,k,z,centers_1):
         
         #local search with no outliers
         U_minus_Z = array_set_diff(dataset,Z)
+        #U_minus_Z = array_row_intersection(dataset,Z)
         print("Calling LS ")
         C = local_search(U_minus_Z,C,k)
         Cbar = deepcopy(C)
@@ -93,15 +100,17 @@ def local_search_outliers(dataset,k,z,centers_1):
                 new_centers = deepcopy(Cbar)
                 new_centers[i,:] = u         
                 U_minus_Z = array_set_diff(dataset,Z)
+                #U_minus_Z = array_row_intersection(dataset,Z)
                 clusters = calc_distances(U_minus_Z,new_centers,z)
                 clusters = clusters.reshape((len(clusters),1))
                 outliers1 = find_outliers(U_minus_Z,new_centers,clusters,z)
                 new_outlier_temp = array_union(Z,outliers1)
-                new_outlier = find_kfarthest(new_outlier_temp,new_centers,z)
+                #new_outlier = find_kfarthest(new_outlier_temp,new_centers,z)
+                new_outlier = new_outlier_temp
         
                 
                 #if this is the most improved center found so far
-                if(cost(dataset,new_centers,new_outlier)<cost(dataset,Cbar,Zbar)):
+                if(cost(dataset,new_centers,new_outlier)<lm*cost(dataset,Cbar,Zbar)):
                     #Update the temp solution
                     Cbar = deepcopy(new_centers)
                     Zbar = deepcopy(new_outlier)
