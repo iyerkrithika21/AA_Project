@@ -47,7 +47,7 @@ def find_kfarthest(dataset,centers,z):
 def local_search_outliers(dataset,k,z,centers_1):
     alpha = 100000000000000
     e = 0.0001
-    lm = 0.85
+    lm = 0.5
     print(k)
     #finding Z=outliers(C)
     clusters = calc_distances(dataset,centers_1,z)

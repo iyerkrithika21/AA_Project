@@ -23,8 +23,8 @@ from local_search_outlier_functions import find_outliers
 from pca_visualization import PCA_visualization
 k = 20
 z = 75
-dim = 5
-num_samp = 250
+dim = 3
+num_samp = 100
 name = "new"+str(k)+"_"+str(z)+"_"+str(dim)+"_"+str(num_samp)+"_"
 
 centers,dataset,added_outliers = generate_synthetic_data(k,z,dim,num_samp)
